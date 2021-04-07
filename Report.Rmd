@@ -1,0 +1,62 @@
+---
+title: ""
+author: "Robert Tumasian III (rat2134)"
+date: "April 19, 2021"
+output: pdf_document
+---
+
+```{r}
+#load libraries
+library(tidyverse)
+library(flexsurv)
+
+#tidy data (379 women!)
+data=read.delim("Menopause.dat",header=T)
+colnames(data)=c("Patient_ID","Intake_Age","Menopause_Age",
+                 "Menopause","Race","Education")
+data=data%>%
+  mutate(Menopause_Time=Menopause_Age-Intake_Age,
+         Race=ifelse(Race==0,"White",ifelse(Race==1,"Black","Other")),
+         Education=ifelse(Education==0,"Post-Grad",
+                          ifelse(Education==1,"College Grad",
+                                 ifelse(Education==2,"Some College","HS or less"))),
+         Race=factor(Race, ordered=T, levels=c("White","Black","Other")),
+         Education=factor(Education, ordered=T, levels=c("HS or less","Some College",
+                                                         "College Grad","Post-Grad")))
+```
+
+```{r}
+#PART A
+
+#Calc median menopause time, and large sample CI
+summary(flexsurv::flexsurvreg(Surv(Menopause_Time,Menopause)~1,
+                              data=data,dist="exponential"))
+plot(flexsurv::flexsurvreg(Surv(Menopause_Time,Menopause)~1,
+                              data=data,dist="exponential"),conf.int=F)
+#lambda=
+#Interpret: Years when half of women expected to experience menopause after intake/recruitment. Chance of experiencing menopause after recruitment just beyond this time is 50%
+
+
+ci.exp.rate=
+ci.median.meno.time=
+  
+plot()
+curve(exp.rate * exp(-x*exp.rate),from=0,to=6,ylab="Value")
+
+ggplot(data,aes(x=Menopause_Time))+geom_histogram()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
