@@ -1,0 +1,145 @@
+---
+title: "Proj4_partB"
+author: "Wenbo Fei"
+date: "4/8/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(survival) 
+library(KMsurv)
+library(flexsurv)
+library(survminer)
+```
+
+
+# Part B: Analyzing menopause_age
+
+Since menopause_age is always no less than intake_age for every patient due to the sampling design, so this is a left truncated, right cencered data.
+
+```{r Bdata}
+data = read.table("Menopause.dat")
+colnames(data) = c("Patient_ID","Intake_Age","Menopause_Age",
+                 "Menopause","Race","Education")
+data = data %>%
+  mutate(Race = ifelse(Race == 0,"White",ifelse(Race == 1,"Black","Other")),
+         Education = ifelse(Education == 0,"Post-Grad",
+                          ifelse(Education == 1,"College Grad",
+                                 ifelse(Education == 2,"Some College","HS or less"))),
+         Race = factor(Race, ordered = FALSE, levels = c("White","Black","Other")),
+         Education = factor(Education, ordered = FALSE, levels = c("HS or less","Some College", "College Grad","Post-Grad")))
+```
+
+## III. Compute a nonparametric estimate for the survival function
+
+The Kaplan-Meier estimate is a nonparametric maximum likelihood estimate (MLE) of the survival function, S(t).
+
+```{r B3.1}
+my.surv.object <- Surv(data$Intake_Age, data$Menopause_Age, data$Menopause)
+my.fit <- survfit(my.surv.object~1) # 
+plot(my.fit, main="Kaplan-Meier estimate with 95% confidence bounds",  xlab="time", ylab="survival function")
+a = summary(my.fit)
+table3 = round(a$surv,4)
+names(table3) = round(a$time,2)# length(table3) # output 75 = 5*15 table?
+table3
+survfit(my.surv.object~1, conf.type = "log")
+fit3.2 = flexsurv::flexsurvreg(my.surv.object~1,
+                              data = data,dist = "exponential")
+summary(fit3.2, type = "median")
+```
+
+From the table, median survival age of the KM estimator is 55.0. 
+
+The results here represents that the median survival age of not having menopause is 55.0 years, it's estimated directly from the survival curve. If the curve doesn't contain 0.5(by the end of the study less than half women develop the menopause), we will not have the estimated median survival time.
+
+The estimate based on the exponential distribution is 12.2. For the parametric estimate, we first fit the data to a exponential model, and find the 1/2 quantile of the cdf as the median, so even if the curve doesn't contain 0.5, we will still get the estimated median survival time.
+
+Because of the memorylessness of exponential distribution, $\operatorname{Pr}(T>s+t \mid T>s)=\operatorname{Pr}(T>t), \quad \forall s, t \geq 0$, it doesn't matter what the at intake age they entered the study, it is estimated that half of these women will develop menopause in the following 12.2 years.
+
+
+## IV. How race relates to menopause_age.
+
+```{r B.4}
+my.fit4 <- survfit(my.surv.object ~ Race, data = data)
+b = summary(my.fit4)
+
+plot(my.fit4, col = c("blue","red", "green") )
+legend("bottomleft", legend = c("White non-Hispanic", "Black, non-Hispanic", "Other Ethnicity"), lty = 1, col = c("blue","red", "green"))
+# logrank test to assess the effect of race
+# (surv_diff <- survdiff(my.surv.object ~ Race, data = data)) # Error: Right censored data only
+cox.fit4 <- coxph(my.surv.object ~ Race, data = data)
+summary(cox.fit4)
+```
+
+P-value for logrank test is 0.04, so the survival distributions for the three race groups are different.
+
+## V. Whether race provides additional information about menopause_age beyond that provided by education.
+
+### Va. Is race a significant predictor of menopause_age after adjusting for education?
+
+```{r B5a}
+cox.fit5 <- coxph(my.surv.object ~ Education + Race, data = data)
+summary(cox.fit5)
+```
+
+Race is still a significant predictor of menopause_age after adjusting for education, as the p-value for hazard ratio for black compared to white is <0.05.
+
+### Vb. Provide point and 95% confidence interval estimates for the relative risk of menopause_age for a Black Patient with an Other Ethnicity patient controlling for education. Interpret.
+
+```{r B5b}
+data0 = read.table("Menopause.dat")
+colnames(data0) = c("Patient_ID","Intake_Age","Menopause_Age",
+                 "Menopause","Race","Education")
+data5 = data0 %>%
+  mutate(Race = ifelse(Race == 0,"White",ifelse(Race == 1,"Black","Other")),
+         Education = ifelse(Education == 0,"Post-Grad",
+                          ifelse(Education == 1,"College Grad",
+                                 ifelse(Education == 2,"Some College","HS or less"))),
+         Race = factor(Race),
+         Race = relevel(Race, ref = "Other"),
+         Education = factor(Education, ordered = FALSE, levels = c("HS or less","Some College", "College Grad","Post-Grad")))
+
+my.surv.object2 <- Surv(data5$Intake_Age, data5$Menopause_Age, data5$Menopause)
+cox.fit5.2 <- coxph(my.surv.object2 ~ Education + Race, data = data5)
+summary(cox.fit5.2)
+```
+
+
+The relative risk of menopause_age for a Black Patient with an Other Ethnicity patient controlling for education is 2.64. The 95% CI is (0.9827, 7.095). 
+
+When t is fixed and adjusting for education, the hazard ratio of a Black Patient with an Other Ethnicity patient is 2.64, the 95% CI of the hazard ratio includes 1 so there's no significant difference in hazard ratio between a Black Patient with an Other Ethnicity patient.
+
+### Vc. Based on the regression model for menopause_age as a function of race and education, produce an estimate of the baseline survival function for White non-Hispanic patients with Post-graduate education.
+
+```{r B5c}
+my.fit5c = survfit(cox.fit5, newdata = data.frame(Race = "White", Education = "Post-Grad"))
+plot(my.fit5c, main = "Kaplan-Meier estimate with 95% confidence bounds",  xlab = "time", ylab = "survival function", sub = "White non-Hispanic patients with Post-graduate education")
+
+```
+
+
+
+### Vd. Check the proportional hazards assumption.
+
+The proportional hazards (PH) assumption can be checked using statistical tests and graphical diagnostics based on the scaled Schoenfeld residuals. In principle, the Schoenfeld residuals are independent of time. A plot that shows a non-random pattern against time is evidence of violation of the PH assumption. The function cox.zph() provides a convenient solution to test the proportional hazards assumption for each covariate included in a Cox refression model fit. For each covariate, the function cox.zph() correlates the corresponding set of scaled Schoenfeld residuals with time, to test for independence between residuals and time. Additionally, it performs a global test for the model as a whole. The proportional hazard assumption is supported by a non-significant relationship between residuals and time, and refuted by a significant relationship.
+
+```{r B5d}
+# To test for the proportional-hazards (PH) assumption
+(test.ph <- cox.zph(cox.fit5))
+```
+
+From the output above, the test is not statistically significant for each of the covariates, and the global test is also not statistically significant. Therefore, we can assume the proportional hazards.
+
+It’s possible to do a graphical diagnostic using the function ggcoxzph(), which produces, for each covariate, graphs of the scaled Schoenfeld residuals against the transformed time.
+
+```{r}
+ggcoxzph(test.ph)
+```
+
+In the figure above, the solid line is a smoothing spline fit to the plot, with the dashed lines representing a +/- 2-standard-error band around the fit.
+
+Note that, systematic departures from a horizontal line are indicative of non-proportional hazards, since proportional hazards assumes that estimates do not vary much over time.
+
+From the graphical inspection, there is no pattern with time. The assumption of proportional hazards appears to be supported for the covariates Race and Education.
