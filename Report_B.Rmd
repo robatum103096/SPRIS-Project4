@@ -39,11 +39,13 @@ The Kaplan-Meier estimate is a nonparametric maximum likelihood estimate (MLE) o
 ```{r B3.1}
 my.surv.object <- Surv(data$Intake_Age, data$Menopause_Age, data$Menopause)
 my.fit <- survfit(my.surv.object~1) # 
-plot(my.fit, main="Kaplan-Meier estimate with 95% confidence bounds",  xlab="time", ylab="survival function")
+plot(my.fit, main = "Kaplan-Meier estimate with 95% confidence bounds",  xlab="time", ylab = "survival function")
 a = summary(my.fit)
-table3 = round(a$surv,4)
-names(table3) = round(a$time,2)# length(table3) # output 75 = 5*15 table?
-table3
+table3 = as.data.frame(round(a$surv,4))
+colnames(table3) = "Survival"
+table3$Time = round(a$time,2)# length(table3) # output 75 = 5*15 table?
+View(table3)
+write_csv(table3, "SPRISP3Q3.csv")
 survfit(my.surv.object~1, conf.type = "log")
 fit3.2 = flexsurv::flexsurvreg(my.surv.object~1,
                               data = data,dist = "exponential")
@@ -65,7 +67,7 @@ Because of the memorylessness of exponential distribution, $\operatorname{Pr}(T>
 my.fit4 <- survfit(my.surv.object ~ Race, data = data)
 b = summary(my.fit4)
 
-plot(my.fit4, col = c("blue","red", "green") )
+plot(my.fit4, col = c("blue","red", "green"), main = "Kaplan-Meier estimate by race", xlab = "time", ylab = "survival function"  )
 legend("bottomleft", legend = c("White non-Hispanic", "Black, non-Hispanic", "Other Ethnicity"), lty = 1, col = c("blue","red", "green"))
 # logrank test to assess the effect of race
 # (surv_diff <- survdiff(my.surv.object ~ Race, data = data)) # Error: Right censored data only
@@ -81,7 +83,9 @@ P-value for logrank test is 0.04, so the survival distributions for the three ra
 
 ```{r B5a}
 cox.fit5 <- coxph(my.surv.object ~ Education + Race, data = data)
-summary(cox.fit5)
+(c = summary(cox.fit5))
+temp = round(cbind(c$conf.int,c$coefficient[,4:5]),2)
+knitr::kable(temp)
 ```
 
 Race is still a significant predictor of menopause_age after adjusting for education, as the p-value for hazard ratio for black compared to white is <0.05.
@@ -123,7 +127,7 @@ plot(my.fit5c, main = "Kaplan-Meier estimate with 95% confidence bounds",  xlab 
 
 ### Vd. Check the proportional hazards assumption.
 
-The proportional hazards (PH) assumption can be checked using statistical tests and graphical diagnostics based on the scaled Schoenfeld residuals. In principle, the Schoenfeld residuals are independent of time. A plot that shows a non-random pattern against time is evidence of violation of the PH assumption. The function cox.zph() provides a convenient solution to test the proportional hazards assumption for each covariate included in a Cox refression model fit. For each covariate, the function cox.zph() correlates the corresponding set of scaled Schoenfeld residuals with time, to test for independence between residuals and time. Additionally, it performs a global test for the model as a whole. The proportional hazard assumption is supported by a non-significant relationship between residuals and time, and refuted by a significant relationship.
+The proportional hazards (PH) assumption can be checked using statistical tests and graphical diagnostics based on the scaled Schoenfeld residuals. In principle, the Schoenfeld residuals are independent of time. A plot that shows a non-random pattern against time is evidence of violation of the PH assumption. The function cox.zph() provides a convenient solution to test the proportional hazards assumption for each covariate included in a Cox regression model fit. For each covariate, the function cox.zph() correlates the corresponding set of scaled Schoenfeld residuals with time, to test for independence between residuals and time. Additionally, it performs a global test for the model as a whole. The proportional hazard assumption is supported by a non-significant relationship between residuals and time, and refuted by a significant relationship.
 
 ```{r B5d}
 # To test for the proportional-hazards (PH) assumption
