@@ -7,7 +7,7 @@ output: pdf_document
 
 # Introduction
 
-According to an October 2020 report by the Mayo Clinic [1](https://www.mayoclinic.org/diseases-conditions/menopause/symptoms-causes/syc-20353397#:~:text=Menopause%20is%20the%20time%20that,is%20a%20natural%20biological%20process.), the average age at which women experience menopause in the United States is about 51 years old. This study was conducted to identify possible exposures of ascertained menopause using data collected from women who have not had a hysterectomy and did not experience menopause before intake/recruitment. "Ascertained menopause" was defined as when a woman had no menstrual periods for twelve months and will be referred to here as "menopause" for simplicity. All women were followed until they experienced menopause, died, or were censored due to dropout or study conclusion.
+According to an October 2020 report by the Mayo Clinic [[1]](https://www.mayoclinic.org/diseases-conditions/menopause/symptoms-causes/syc-20353397#:~:text=Menopause%20is%20the%20time%20that,is%20a%20natural%20biological%20process.), the average age at which women experience menopause in the United States is about 51 years old. This study was conducted to identify possible exposures of ascertained menopause using data collected from women who have not had a hysterectomy and did not experience menopause before intake/recruitment. "Ascertained menopause" was defined as when a woman had no menstrual periods for twelve consecutive months and will be referred to here as "menopause" for simplicity. All women were followed until they experienced menopause, died, or were censored due to dropout or study conclusion.
 
 # Data Description
 
@@ -36,7 +36,7 @@ The goals of this study were to:
 
 # Methods
 
-For objective #1, under the exponential assumption, we estimated the median menopause time by building a survival model and obtaining the rate parameter ($\hat{\lambda}$) and a corresponding 95\% CI. Then, since the menopause times are assumed to follow an exponential distribution, the median menopause time would be log(2)/$\hat{\lambda}$. To obtain a 95\% CI for the median menopause time, the classical CLT was applied. Since the menopause times $X\sim Exp(\lambda)$, then $\bar{X}\sim N(\lambda,\frac{\lambda^2}{n})$ for large $n$. Since $\mu=median(X)\approx \frac{log(2)}{\hat\lambda}$ under the normal distribution, we can derive a 95\% CI for the true median menopause time. We can show:
+For objective #1, under the exponential assumption, we estimated the median menopause time by building a survival model and obtaining the rate parameter ($\hat{\lambda}$) with a corresponding 95\% CI. Then, since the menopause times are assumed to follow an exponential distribution, the estimated median menopause time would be log(2)/$\hat{\lambda}$. To obtain a 95\% CI for the median menopause time, the classical CLT was applied. Since $X\sim Exp(\lambda)$, then $\bar{X}\sim N(\lambda,\frac{\lambda^2}{n})$ for large $n$, where $X$ denotes the menopause times. Since $\mu=median(X)\approx \frac{log(2)}{\hat\lambda}$ under the normal distribution, we can derive a 95\% CI for the true median menopause time. We can show:
 
 $$
 \begin{aligned}
@@ -48,7 +48,7 @@ $$
 \end{aligned}
 $$
 
-Therefore a 95\% CI for the true median menopause time is
+Therefore, a 95\% CI for the true median menopause time is
 
 $$\left[\frac{log(2)}{\hat\lambda}*(1-\frac{1.96}{\sqrt{n}}), \frac{log(2)}{\hat\lambda}*(1+\frac{1.96}{\sqrt{n}}) \right],$$
 
@@ -58,9 +58,9 @@ Without specifying the distribution of the menopause times, a reasonable estimat
 
 For objective #2, a KM model was used to estimate the survival curve for menopause age. Then, an associated survival table was generated to obatin an estimated median menopause age. This estimate was compared to the estimate obtained under the exponential assumption in objective #1.
 
-Next, for objective #3, three separate KM curves for menopause age were generated for each race group. To determine if the survival distributions for menopause age were statistically different, we conducted a log-rank test. 
+Next, for objective #3, three separate KM curves for menopause age were generated for each race group. To determine if the survival distributions for menopause age were statistically different, we conducted a score test using the Cox proportional hazards (PH) model, since a log-rank test cannot be completed with left-truncated data. However, this score test is equivalent to the log-rank test.
 
-For objective #4, to determine if race was a significant predictor of menopause age after controlling for education level, we built a Cox proportional hazards (PH) model, which can be expressed as
+For objective #4, to determine if race was a significant predictor of menopause age after controlling for education level, we built a PH model, which can be expressed as
 
 \begin{center}
 $$Y_i=h_0(t)*exp(\beta_1*Race_i+\beta_2*Education_i),$$
@@ -70,9 +70,9 @@ where $i=1,...,380$ denotes each woman in the study, $Y_i$ denotes the expected 
 
 Finally, we supplemented our primary objectives with the following requested information:
 
-1. A point estimate and associated 95\% CI for the hazard ratio of menopause age for a Black patient with an Other ethnicity patient, controlling for education level, with interpretations.
+1. A point estimate and associated 95\% CI for the hazard ratio of menopause age for a Black woman with an Other ethnicity woman, controlling for education level, with interpretations.
 
-2. An estimate of the baseline survival function for White, non-Hispanic patients with post-graduate education.
+2. An estimate of the baseline survival function for White and non-Hispanic women with post-graduate education.
 
 # Results
 
@@ -80,21 +80,45 @@ Finally, we supplemented our primary objectives with the following requested inf
 
 Assuming the menopause times follow an exponential distribution, the model esimated the rate parameter to be 0.057 (95\% CI: [0.045,0.071]). Since the exponential curve does not reach down to a survival probbility of 0.5 (Figure 1), we can infer the median menopause time using this rate estimate. Under the exponential assumption, we obtain an estimated median menopause time of log(2)/$\hat\lambda$ = log(2)/0.057 = 12.16 (95\% CI: [10.94,13.38]), where the CI is calculated using the formula in the Methods section with $n=380$. Therefore, we expect that 50\% of the women in the study will experience menopause about 12.16 years after intake/recruitment, and we are 95\% confident that the true median menopause time lies in the interval [10.94,13.38].
 
-Next, a non-parametric KM curve was fit to the data, in which the underlying distribution of the menopause times was assumed to be unknown. Similar to the exponential curve above, the KM curve also did not reach a survival probability of 0.5. However, inferring an appreciable median menopause time here is not possible due to the non-parametric nature of the KM model. The maximum menopause time is (Table 1), which is the closest we can get to the median value. Since, a one-sided 95\% CI for the median menopause time would be (,$\infty$).
+Next, a non-parametric KM curve was fit to the data, in which the underlying distribution of the menopause times was assumed to be unknown. Similar to the exponential curve above, the KM curve also did not reach a survival probability of 0.5. However, extrapolating an appreciable median menopause time here is not possible due to the non-parametric nature of the KM model. The maximum menopause time is about 4.04 years after intake (last row of Table 1), which is the closest we can get to the median value. Thus, a one-sided 95\% CI for the median menopause time via KM would be (4.04,$\infty$). Compared to the median menopause time calculated under the exponential assumption, the median value we obtain from the non-parametric KM method is very unreliable, since we can only use the maximum menopause time.
 
-This result agrees with lit...
+## Objective \#2
+
+Using the method of KM, we obtained an estimated median menopause age of about 55 years old (Table 2), which is close to the national average reported by the Mayo Clinic [[1]](https://www.mayoclinic.org/diseases-conditions/menopause/symptoms-causes/syc-20353397#:~:text=Menopause%20is%20the%20time%20that,is%20a%20natural%20biological%20process.). Thus, half of the women in the study experienced menopause by age 55. Here, the median can be obtained directly, since the KM curve goes below 0.5 (Figure 2). Note that the menopause age data is left-truncated, so the estimated median here is much higher than the one calculated under the exponential assumption using the non-truncated menopause time data (menopause age - intake age). The median menopause time from the exponential curve represents the expected number of years *after intake* that 50\% of the women will experience menopause, whereas the median menopause age represents the expected number of years *from birth* that 50\% of the women will experience menopause.
+
+## Objective \#3
+
+To determine whether the survival distributions for the race groups were different, we plotted three KM curves for menopause age for each race group (Figure 3) and used the score test described in the Methods section. Based on the score test, the survival curves for the three race groups are statistically different ($p=0.04$) at the $\alpha=0.05$ significance level.
+
+## Objective \#4
+
+To further explore the role of race in menopause age and the effect of education level, we built the PH model given in the Methods section (reference level for race = White and non-Hispanic, reference level for education level = high school or less). After controlling for education, race is a significant predictor of menopause age at the $\alpha=0.05$ significance level ($p=0.006$) (Table 3). Specifically, the hazard ratio of experiencing menopause at a certain age for a Black and non-Hispanic woman compared to a White and non-Hispanic woman is 2.50 (95\% CI: [1.30,4.82]), adjusting for education level (Table 3).
 
 ## Supplemental Information
 
+After refitting the PH model using a different reference level for race (Other), we no longer achieve significance at the $\alpha=0.05$ level (all $p>0.05$) (Table 4). The hazard ratios for experiencing menopause at a particular age for a White and non-Hispanic woman and for a Black and non-Hispanic woman are not statistically different from a women of an Other race. Here, the hazard ratio of experiencing menopause at a certain age for a Black and non-Hispanic woman compared to a woman of an Other race is 2.64 (95\% CI: [0.98,7.10]), adjusting for education level (Table 4).
+
+We also estimated the survival curve for menopause age for White and non-Hispanic women with a post-graduate education using the KM method (Figure 4).
+
+Lastly, since the Schoenfeld residuals for race and education are spread randomly above and below zero, and the global and individual Schoenfeld tests yielded $p$-values >0.05 (Figure 5), the PH assumption was verified. Thus, all of our PH model results are reliable at the $\alpha=0.05$ significance level.
 
 # Limitations
 
-This study had several notable limitations. First, 
+This study had several notable limitations. First, only about 20\% of the women in the study (75/380) experienced menopause. A larger sample would allow us to obtain more dependable results. Second, there was disproportionate censoring among Black women, which further restricted our results. Lastly, the data we analyzed was observational, and thus unobserved or unmeasured factors may have affected our findings.
 
-```{r,message=FALSE,warning=FALSE,echo=FALSE}
+\newpage
+
+# Appendix
+
+## Tables
+
+```{r,message=FALSE,warning=FALSE,echo=FALSE,include=FALSE}
 #load libraries
 library(tidyverse)
 library(flexsurv)
+library(survival) 
+library(KMsurv)
+library(survminer)
 
 #tidy data
 data=read.table("Menopause.dat")
@@ -111,55 +135,182 @@ data=data%>%
                                                          "College Grad","Post-Grad")))
 ```
 
-```{r}
+\begin{center}
+Table 1: Survival table for menopause time via KM.
+\end{center}
+
+```{r,echo=FALSE}
+#Non-parameteric estimate of survival function (via KM)
+surv2=Surv(data$Menopause_Time,data$Menopause)
+fit=survfit(surv2~1)
+data.frame(cbind(Time=round(summary(fit)$time,3),
+                      N.at.risk=summary(fit)$n.risk,
+                      N.events=summary(fit)$n.event,
+                      Survival=round(summary(fit)$surv,3),
+                      lower.CI=round(summary(fit)$lower,3),
+                      upper.CI=round(summary(fit)$upper,3)))%>%
+  knitr::kable()
+```
+
+\newpage
+
+\begin{center}
+Table 2: Survival table for menopause age via KM.
+\end{center}
+
+```{r Bdata, echo=FALSE, include=FALSE}
+data2 = read.table("Menopause.dat")
+colnames(data2) = c("Patient_ID","Intake_Age","Menopause_Age",
+                 "Menopause","Race","Education")
+data2 = data2 %>%
+  mutate(Race = ifelse(Race == 0,"White",ifelse(Race == 1,"Black","Other")),
+         Education = ifelse(Education == 0,"Post-Grad",
+                          ifelse(Education == 1,"College Grad",
+                                 ifelse(Education == 2,"Some College","HS or less"))),
+         Race = factor(Race, ordered = FALSE, levels = c("White","Black","Other")),
+         Education = factor(Education, ordered = FALSE, levels = c("HS or less","Some College", "College Grad","Post-Grad")))
+```
+
+```{r B3.1, echo=FALSE}
+my.surv.object <- Surv(data2$Intake_Age, data2$Menopause_Age, data2$Menopause)
+my.fit <- survfit(my.surv.object~1) # 
+data.frame(cbind(Time=round(summary(my.fit)$time,3),
+                      N.at.risk=summary(my.fit)$n.risk,
+                      N.events=summary(my.fit)$n.event,
+                      Survival=round(summary(my.fit)$surv,3),
+                      lower.CI=round(summary(my.fit)$lower,3),
+                      upper.CI=round(summary(my.fit)$upper,3)))%>%
+  knitr::kable()
+```
+
+\newpage
+
+\begin{center}
+Table 3: Cox PH model results for race (reference = White and non-Hispanic), adjusting for education.
+\end{center}
+
+```{r B5a,echo=FALSE}
+cox.fit5 <- coxph(my.surv.object ~ Education + Race, data = data2)
+#(c = summary(cox.fit5))
+#temp = round(cbind(c$conf.int,c$coefficient[,4:5]),2)
+```
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ccccc}
+\hline
+\textbf{Variable} & \textbf{Hazard Ratio} & \multicolumn{2}{c}{\textbf{95\% CI}} & \textbf{p-Value} \\ \hline
+Education = Some College     & 1.945 & 0.831 & 4.554 & 0.125          \\
+Education = College Graduate & 1.006 & 0.426 & 2.374 & 0.989          \\
+Education = Post-Graduate    & 1.939 & 0.872 & 4.311 & 0.104          \\
+Race = Black                 & 2.50  & 1.300 & 4.819 & \textcolor{red}{\textbf{0.006}} \\
+Race = Other                 & 0.948 & 0.405 & 2.218 & 0.902          \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{center}
+Table 4: Cox PH model results for race (reference = Other), adjusting for education.
+\end{center}
+
+```{r B5b, echo=FALSE}
+data0 = read.table("Menopause.dat")
+colnames(data0) = c("Patient_ID","Intake_Age","Menopause_Age",
+                 "Menopause","Race","Education")
+data5 = data0 %>%
+  mutate(Race = ifelse(Race == 0,"White",ifelse(Race == 1,"Black","Other")),
+         Education = ifelse(Education == 0,"Post-Grad",
+                          ifelse(Education == 1,"College Grad",
+                                 ifelse(Education == 2,"Some College","HS or less"))),
+         Race = factor(Race),
+         Race = relevel(Race, ref = "Other"),
+         Education = factor(Education, ordered = FALSE, levels = c("HS or less","Some College", "College Grad","Post-Grad")))
+
+my.surv.object2 <- Surv(data5$Intake_Age, data5$Menopause_Age, data5$Menopause)
+cox.fit5.2 <- coxph(my.surv.object2 ~ Education + Race, data = data5)
+#summary(cox.fit5.2)
+```
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ccccc}
+\hline
+\textbf{Variable} & \textbf{Hazard Ratio} & \multicolumn{2}{c}{\textbf{95\% CI}} & \textbf{p-Value} \\ \hline
+Education = Some College     & 1.945 & 0.831 & 4.554 & 0.125 \\
+Education = College Graduate & 1.006 & 0.426 & 2.374 & 0.989 \\
+Education = Post-Graduate    & 1.939 & 0.872 & 4.311 & 0.104 \\
+Race = Black                 & 2.640 & 0.982 & 7.095 & 0.054 \\
+Race = White                 & 1.055 & 0.451 & 2.469 & 0.902 \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+\newpage
+
+
+## Figures
+
+\begin{center}
+Figure 1: Estimated survival functions for menopause time under the exponential assumption (red curve) and under no distributional assumption using KM (black curve).
+\end{center}
+
+```{r,echo=FALSE}
 #PART A
 
 #Calc median menopause time and large sample CI
 surv1=flexsurv::flexsurvreg(Surv(Menopause_Time,Menopause)~1,
                             data=data,dist="exp") #rate=lambda=0.057
-summary(flexsurv::flexsurvreg(Surv(Menopause_Time,Menopause)~1,
+summary1=summary(flexsurv::flexsurvreg(Surv(Menopause_Time,Menopause)~1,
                               data=data,dist="exp"))
-par(pty="s")
 plot(flexsurv::flexsurvreg(Surv(Menopause_Time,Menopause)~1,
                               data=data,dist="exp"),conf.int=F,
-     ylab="Survival Probability",xlab="Menopause Time (yr)")
+     ylab="Survival Probability",xlab="Menopause Time (yr)",ylim=c(0.5,1))
 median.meno.time=log(2)/0.057 #estimated median=12.16 years
 #Interpret: Years when half of women expected to experience menopause after intake/recruitment (ascertained menopause). Chance of experiencing menopause after recruitment just beyond this time is 50%
-
-ci.exp.rate #(0.045,0.071)
-ci.median.meno.time
-#Interpret: We are 95% confident that the population median menopause time falls btw the two #s
 ```
 
-```{r}
-#Non-parameteric estimate of survival function (via KM)
-surv2=Surv(data$Menopause_Time,data$Menopause)
-fit=survfit(surv2~1)
-par(pty="s")
-plot(surv2)
-fit
-summary(fit) #table of estimates
+\newpage
 
-View(data.frame(cbind(Survival=round(summary(fit)$surv[seq(1,73,by=4)],3),
-                 Time=round(summary(fit)$time[seq(1,73,by=4)],3)))) #for pres
+\begin{center}
+Figure 2: Estimated survival function for menopause age via KM.
+\end{center}
 
-
-par(mfrow=c(1,2))
-plot(flexsurv::flexsurvreg(Surv(Menopause_Time,Menopause)~1,
-                              data=data,dist="exp"),conf.int=F)
-plot(surv2)
+```{r,echo=FALSE}
+plot(my.fit, xlab="Menopause Age (yr)", ylab = "Survival Probability")
 ```
 
+\newpage
 
+\begin{center}
+Figure 3: KM survival curves for menopause age by race.
+\end{center}
 
+```{r,echo=FALSE}
+my.fit4 <- survfit(my.surv.object ~ Race, data = data2)
+b = summary(my.fit4)
+plot(my.fit4, col = c("blue","red", "green"), xlab = "Menopause Age (yr)", ylab = "Survival Probability")
+legend("bottomleft", legend = c("White and non-Hispanic", "Black and non-Hispanic", "Other"), lty = 1, col = c("blue","red", "green"))
+```
 
+\newpage
 
+\begin{center}
+Figure 4: KM curve for menopause age for White and non-Hispanic women with a post-graduate education.
+\end{center}
 
+```{r B5c, echo=FALSE}
+my.fit5c = survfit(cox.fit5, newdata = data.frame(Race = "White", Education = "Post-Grad"))
+plot(my.fit5c,  xlab = "Menopause Age (yr)", ylab = "Survival Probability")
+```
 
+\newpage
 
+\begin{center}
+Figure 5: Schoenfeld residual plots and test results for race and education.
+\end{center}
 
-
-
-
-
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+test.ph <- cox.zph(cox.fit5)
+ggcoxzph(test.ph)
+```
 

@@ -39,7 +39,8 @@ The Kaplan-Meier estimate is a nonparametric maximum likelihood estimate (MLE) o
 ```{r B3.1}
 my.surv.object <- Surv(data$Intake_Age, data$Menopause_Age, data$Menopause)
 my.fit <- survfit(my.surv.object~1) # 
-plot(my.fit, main = "Kaplan-Meier estimate with 95% confidence bounds",  xlab="time", ylab = "survival function")
+par(pty="s")
+plot(my.fit, xlab="Menopause Age (yr)", ylab = "Survival Probability")
 a = summary(my.fit)
 table3 = as.data.frame(round(a$surv,4))
 colnames(table3) = "Survival"
